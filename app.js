@@ -1,4 +1,5 @@
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const AUTHOR_KEY = "author-name";
 
 const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
@@ -10,8 +11,20 @@ const progressBar = progressFill.parentElement;
 const mascot = document.getElementById("mascot");
 const bubble = document.getElementById("bubble");
 const errorBox = document.getElementById("error");
+const authorInput = document.getElementById("author-input");
 
 let todos = [];
+
+// 이름은 이 브라우저에만 기억한다. 저장이 막힌 환경에서는 매번 새로 적으면 된다
+try {
+  authorInput.value = localStorage.getItem(AUTHOR_KEY) || "";
+} catch {}
+
+authorInput.addEventListener("input", () => {
+  try {
+    localStorage.setItem(AUTHOR_KEY, authorInput.value.trim());
+  } catch {}
+});
 
 function showError(action, error) {
   errorBox.textContent = `${action} 못했어요: ${error.message}`;
@@ -32,7 +45,7 @@ function requireRows(data, error) {
 async function load() {
   const { data, error } = await db
     .from("todos")
-    .select("id, text, done")
+    .select("id, text, done, author_name")
     .order("created_at")
     .order("id");
   if (error) return showError("할 일을 불러오지", error);
@@ -73,7 +86,13 @@ function render() {
 
     const text = document.createElement("span");
     text.className = "text";
-    text.textContent = todo.text;
+    if (todo.author_name) {
+      const author = document.createElement("strong");
+      author.className = "author";
+      author.textContent = `${todo.author_name}: `;
+      text.append(author);
+    }
+    text.append(todo.text);
 
     const del = document.createElement("button");
     del.className = "delete";
@@ -136,7 +155,12 @@ form.addEventListener("submit", async (e) => {
 
   const button = form.querySelector("button");
   button.disabled = true;
-  const { data, error } = await db.from("todos").insert({ text }).select("id, text, done").single();
+  const author_name = authorInput.value.trim() || null;
+  const { data, error } = await db
+    .from("todos")
+    .insert({ text, author_name })
+    .select("id, text, done, author_name")
+    .single();
   button.disabled = false;
   if (error) return showError("할 일을 추가하지", error);
 
