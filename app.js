@@ -13,11 +13,27 @@ const bubble = document.getElementById("bubble");
 const errorBox = document.getElementById("error");
 const authorInput = document.getElementById("author-input");
 const dueInput = document.getElementById("due-input");
+const filterButtons = document.querySelectorAll(".filter");
+const remaining = document.getElementById("remaining");
 
 const COLUMNS = "id, text, done, author_name, due_date";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+const FILTERS = {
+  all: { show: () => true, empty: "할 일이 없어요. 위에 입력해 보세요!" },
+  active: { show: (t) => !t.done, empty: "진행 중인 할 일이 없어요." },
+  done: { show: (t) => t.done, empty: "완료한 할 일이 없어요." },
+};
+
 let todos = [];
+let filter = "all";
+
+for (const button of filterButtons) {
+  button.addEventListener("click", () => {
+    filter = button.dataset.filter;
+    render();
+  });
+}
 
 // 이름은 이 브라우저에만 기억한다. 저장이 막힌 환경에서는 매번 새로 적으면 된다
 try {
@@ -88,8 +104,9 @@ async function load() {
 function render() {
   list.innerHTML = "";
   todos.sort(byDueDate);
+  const visible = todos.filter(FILTERS[filter].show);
 
-  for (const todo of todos) {
+  for (const todo of visible) {
     const li = document.createElement("li");
     li.className = "todo-item" + (todo.done ? " done" : "");
 
@@ -166,7 +183,12 @@ function render() {
   counter.textContent = `${doneCount}/${todos.length} 완료`;
   progressFill.style.width = `${percent}%`;
   progressBar.setAttribute("aria-valuenow", percent);
-  empty.hidden = todos.length > 0;
+  remaining.textContent = `남은 할 일 ${todos.length - doneCount}개`;
+  empty.textContent = FILTERS[filter].empty;
+  empty.hidden = visible.length > 0;
+  for (const button of filterButtons) {
+    button.setAttribute("aria-pressed", button.dataset.filter === filter);
+  }
 
   updateMascot(doneCount);
 }
