@@ -12,6 +12,10 @@ const mascot = document.getElementById("mascot");
 const bubble = document.getElementById("bubble");
 const errorBox = document.getElementById("error");
 const authorInput = document.getElementById("author-input");
+const dueInput = document.getElementById("due-input");
+
+const COLUMNS = "id, text, done, author_name, due_date";
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 let todos = [];
 
@@ -42,11 +46,38 @@ function requireRows(data, error) {
   return null;
 }
 
+// 마감이 가까운 순서, 마감이 없으면 맨 아래, 같으면 먼저 만든 순서.
+// due_date는 "YYYY-MM-DD" 문자열이라 글자 비교가 곧 날짜 비교다
+function byDueDate(a, b) {
+  if (a.due_date !== b.due_date) {
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return a.due_date < b.due_date ? -1 : 1;
+  }
+  return a.id - b.id;
+}
+
+// 마감일까지 남은 날짜 수. 시간대 차이로 하루가 어긋나지 않게 날짜만 UTC로 비교한다
+function daysLeft(dueDate) {
+  const [y, m, d] = dueDate.split("-").map(Number);
+  const now = new Date();
+  return Math.round(
+    (Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / DAY_MS
+  );
+}
+
+function dueLabel(dueDate) {
+  const [, m, d] = dueDate.split("-").map(Number);
+  const left = daysLeft(dueDate);
+  const tag = left === 0 ? "D-day" : left > 0 ? `D-${left}` : `D+${-left}`;
+  return { text: `${m}/${d} ${tag}`, left };
+}
+
 async function load() {
   const { data, error } = await db
     .from("todos")
-    .select("id, text, done, author_name")
-    .order("created_at")
+    .select(COLUMNS)
+    .order("due_date", { nullsFirst: false })
     .order("id");
   if (error) return showError("할 일을 불러오지", error);
   clearError();
@@ -56,6 +87,7 @@ async function load() {
 
 function render() {
   list.innerHTML = "";
+  todos.sort(byDueDate);
 
   for (const todo of todos) {
     const li = document.createElement("li");
@@ -94,6 +126,16 @@ function render() {
     }
     text.append(todo.text);
 
+    const due = document.createElement("span");
+    if (todo.due_date) {
+      const label = dueLabel(todo.due_date);
+      due.className = "due";
+      if (!todo.done && label.left < 0) due.classList.add("overdue");
+      else if (!todo.done && label.left <= 1) due.classList.add("soon");
+      due.textContent = label.text;
+      due.title = `마감일 ${todo.due_date}`;
+    }
+
     const del = document.createElement("button");
     del.className = "delete";
     del.textContent = "✕";
@@ -111,7 +153,9 @@ function render() {
       render();
     });
 
-    li.append(checkbox, text, del);
+    li.append(checkbox, text);
+    if (todo.due_date) li.append(due);
+    li.append(del);
     list.append(li);
   }
 
@@ -156,10 +200,11 @@ form.addEventListener("submit", async (e) => {
   const button = form.querySelector("button");
   button.disabled = true;
   const author_name = authorInput.value.trim() || null;
+  const due_date = dueInput.value || null;
   const { data, error } = await db
     .from("todos")
-    .insert({ text, author_name })
-    .select("id, text, done, author_name")
+    .insert({ text, author_name, due_date })
+    .select(COLUMNS)
     .single();
   button.disabled = false;
   if (error) return showError("할 일을 추가하지", error);
@@ -167,6 +212,7 @@ form.addEventListener("submit", async (e) => {
   clearError();
   todos.push(data);
   input.value = "";
+  dueInput.value = "";
   render();
 });
 
