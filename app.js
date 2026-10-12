@@ -28,6 +28,14 @@ const FILTERS = {
 let todos = [];
 let filter = "all";
 
+// 할 일 뽑기: 캐릭터를 누르면 룰렛처럼 돌다가 진행 중인 할 일 하나를 골라 준다
+let pickedId = null;
+let spinning = false;
+let flash = null; // 잠깐 보여 줄 말풍선 문구
+let flashTimer = null;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CONFETTI_COLORS = ["#ff6fa5", "#9f7aea", "#ffd166", "#6fd3ff", "#7be0a5"];
+
 for (const button of filterButtons) {
   button.addEventListener("click", () => {
     filter = button.dataset.filter;
@@ -109,6 +117,7 @@ function render() {
   for (const todo of visible) {
     const li = document.createElement("li");
     li.className = "todo-item" + (todo.done ? " done" : "");
+    if (todo.id === pickedId && !todo.done) li.classList.add("picked");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -130,6 +139,11 @@ function render() {
       clearError();
       todo.done = checkbox.checked;
       if (todo.done) replay(mascot, "jump");
+      if (todo.done && todo.id === pickedId) {
+        pickedId = null;
+        celebrate(checkbox);
+        showFlash("뽑기 미션 성공! 최고예요 🎉");
+      }
       render();
     });
 
@@ -251,17 +265,95 @@ function startEdit(todo, textEl) {
 
 function updateMascot(doneCount) {
   const left = todos.length - doneCount;
+  const picked = todos.find((t) => t.id === pickedId && !t.done);
   let message;
-  if (todos.length === 0) message = "오늘은 뭘 할까요? 적어 주세요!";
+  if (flash) message = flash;
+  else if (picked) message = `🎯 "${shorten(picked.text)}" 먼저 해 볼까요?`;
+  else if (todos.length === 0) message = "오늘은 뭘 할까요? 적어 주세요!";
   else if (left === 0) message = "모두 완료! 정말 대단해요 🎉";
   else if (doneCount === 0) message = "화이팅! 하나씩 해봐요 ✨";
   else message = `좋아요! ${left}개만 더 하면 돼요 💪`;
 
   mascot.classList.toggle("happy", todos.length > 0 && left === 0);
 
+  if (spinning) return;
   if (bubble.textContent !== message) {
     bubble.textContent = message;
     replay(bubble, "pop");
+  }
+}
+
+function shorten(text, max = 18) {
+  return text.length > max ? text.slice(0, max) + "…" : text;
+}
+
+function showFlash(message) {
+  flash = message;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => {
+    flash = null;
+    render();
+  }, 3000);
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function spin() {
+  if (spinning) return;
+  const candidates = todos.filter((t) => !t.done);
+  if (!candidates.length) {
+    showFlash(todos.length ? "다 끝냈는데요? 뽑을 게 없어요 😎" : "뽑을 할 일이 없어요! 먼저 적어 주세요");
+    return render();
+  }
+
+  const winner = candidates[Math.floor(Math.random() * candidates.length)];
+  pickedId = null;
+  flash = null;
+  render();
+
+  // 처음엔 빠르게, 점점 느려지며 후보를 넘겨 보다가 당첨된 할 일에서 멈춘다
+  if (!reducedMotion && candidates.length > 1) {
+    spinning = true;
+    mascot.classList.add("spinning");
+    let i = Math.floor(Math.random() * candidates.length);
+    for (let delay = 50; delay < 280; delay *= 1.12) {
+      bubble.textContent = `🎲 ${shorten(candidates[i++ % candidates.length].text)}`;
+      await sleep(delay);
+    }
+    mascot.classList.remove("spinning");
+    spinning = false;
+  }
+
+  pickedId = winner.id;
+  replay(mascot, "jump");
+  render();
+}
+
+mascot.addEventListener("click", spin);
+mascot.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    spin();
+  }
+});
+
+// 체크박스 자리에서 색종이를 사방으로 터뜨린다
+function celebrate(fromEl) {
+  if (reducedMotion) return;
+  const { left, top, width, height } = fromEl.getBoundingClientRect();
+  for (let i = 0; i < 28; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti";
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 90;
+    piece.style.left = `${left + width / 2}px`;
+    piece.style.top = `${top + height / 2}px`;
+    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+    piece.style.setProperty("--dy", `${Math.sin(angle) * distance - 40}px`);
+    piece.style.setProperty("--rot", `${Math.random() * 720 - 360}deg`);
+    document.body.append(piece);
+    setTimeout(() => piece.remove(), 1100);
   }
 }
 
