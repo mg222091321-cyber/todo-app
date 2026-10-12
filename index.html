@@ -14,26 +14,41 @@
   <div class="app">
     <section class="stage">
       <svg id="mascot" class="mascot" viewBox="0 0 160 180" role="img" aria-label="응원하는 캐릭터">
+        <defs>
+          <clipPath id="mascot-face-clip"><path d="M48 70 C48 50 62 39 80 39 C98 39 112 50 112 70 C112 94 105 111 93 119 Q80 127 67 119 C55 111 48 94 48 70 Z" /></clipPath>
+          <clipPath id="mascot-dress-clip"><path d="M36 180 C37 152 50 137 69 133 Q80 141 91 133 C110 137 123 152 124 180 Z" /></clipPath>
+        </defs>
         <!-- 뒷머리: 어깨 아래까지 내려오는 긴 머리 -->
         <path class="hair-back" d="M80 18 C44 18 30 46 31 82 C32 114 27 140 20 162 C38 170 56 164 64 150 L96 150 C104 164 122 170 140 162 C133 140 128 114 129 82 C130 46 116 18 80 18 Z" />
         <!-- 몸 -->
         <path class="dress" d="M36 180 C37 152 50 137 69 133 Q80 141 91 133 C110 137 123 152 124 180 Z" />
+        <!-- 옷 음영: 가장자리를 어둡게, 팔과 몸의 경계와 주름 -->
+        <g clip-path="url(#mascot-dress-clip)">
+          <path class="dress-shade" d="M30 180 C34 156 44 142 58 136 C52 150 50 166 52 180 Z" />
+          <path class="dress-shade" d="M130 180 C126 156 116 142 102 136 C108 150 110 166 108 180 Z" />
+          <path class="dress-shade" d="M66 131 Q80 146 94 131 L96 140 Q80 154 64 140 Z" />
+        </g>
+        <path class="fold" d="M53 150 Q50 165 50 180" />
+        <path class="fold" d="M107 150 Q110 165 110 180" />
         <!-- 목 -->
         <path class="skin" d="M71 108 L71 129 Q80 136 89 129 L89 108 Z" />
         <path class="skin-shade" d="M71 112 Q80 124 89 112 L89 108 L71 108 Z" />
-        <!-- 칼라와 리본 -->
-        <path class="collar" d="M69 133 Q60 141 63 150 Q74 150 80 140 Z" />
-        <path class="collar" d="M91 133 Q100 141 97 150 Q86 150 80 140 Z" />
-        <g class="ribbon">
-          <path d="M80 142 L71 137 L72 147 Z" />
-          <path d="M80 142 L89 137 L88 147 Z" />
-          <circle cx="80" cy="142" r="2.6" />
-        </g>
+        <!-- V넥 가디건 안의 흰 셔츠 -->
+        <path class="collar" d="M69 133 Q80 141 91 133 L80 151 Z" />
+        <path class="fold" d="M69 133 L80 151 L91 133" />
         <!-- 귀 -->
         <ellipse class="skin" cx="48" cy="83" rx="5" ry="8" />
         <ellipse class="skin" cx="112" cy="83" rx="5" ry="8" />
         <!-- 얼굴: 갸름한 턱선 -->
-        <path class="skin" d="M48 70 C48 50 62 39 80 39 C98 39 112 50 112 70 C112 92 104 108 92 116 Q80 123 68 116 C56 108 48 92 48 70 Z" />
+        <path class="skin" d="M48 70 C48 50 62 39 80 39 C98 39 112 50 112 70 C112 94 105 111 93 119 Q80 127 67 119 C55 111 48 94 48 70 Z" />
+        <!-- 얼굴 음영: 앞머리 그림자, 턱 아래와 양옆 -->
+        <g clip-path="url(#mascot-face-clip)">
+          <path class="face-shade" d="M44 78 C39 43 56 20 80 20 C104 20 121 43 116 78 C113 66 109 58 103 53 C101 61 95 66 88 68 C90 60 89 54 85 49 C81 58 73 64 62 66 C66 60 66 55 64 51 C58 57 51 66 44 78 Z" transform="translate(0 3.5)" />
+          <path class="face-shade" d="M44 80 C46 100 56 114 68 120 L60 124 L40 124 Z" />
+          <path class="face-shade" d="M116 80 C114 100 104 114 92 120 L100 124 L120 124 Z" />
+        </g>
+        <ellipse class="cheek-light" cx="62" cy="93" rx="4" ry="2" />
+        <ellipse class="cheek-light" cx="98" cy="93" rx="4" ry="2" />
         <!-- 볼터치 -->
         <ellipse class="blush" cx="59" cy="97" rx="7" ry="3.5" />
         <ellipse class="blush" cx="101" cy="97" rx="7" ry="3.5" />
@@ -42,6 +57,7 @@
         <path class="brow" d="M89 66 Q95.5 63.5 102 67.5" />
         <!-- 기본 눈: 흰자, 홍채, 동공, 반짝임, 속눈썹 -->
         <g class="eyes-open">
+          <g transform="translate(0 83) scale(1 0.86) translate(0 -83)">
           <ellipse class="sclera" cx="65" cy="82.5" rx="7.4" ry="8.6" />
           <ellipse class="sclera" cx="95" cy="82.5" rx="7.4" ry="8.6" />
           <ellipse class="iris" cx="65.4" cy="83" rx="6" ry="7.8" />
@@ -58,6 +74,7 @@
           <path class="lash" d="M87.5 78 Q95 70.5 103 76.5 L105.5 74.5" />
           <path class="lash-lower" d="M59 90 Q65 92.5 71 89.5" />
           <path class="lash-lower" d="M101 90 Q95 92.5 89 89.5" />
+          </g>
         </g>
         <!-- 웃는 눈 -->
         <g class="eyes-happy">
@@ -74,6 +91,9 @@
         <path class="hair" d="M111 60 C117 82 116 104 121 124 C112 118 107 100 107 82 Z" />
         <!-- 앞머리: 갈래가 나뉜 자연스러운 앞머리 -->
         <path class="hair" d="M44 78 C39 43 56 20 80 20 C104 20 121 43 116 78 C113 66 109 58 103 53 C101 61 95 66 88 68 C90 60 89 54 85 49 C81 58 73 64 62 66 C66 60 66 55 64 51 C58 57 51 66 44 78 Z" />
+        <!-- 머리 안쪽 그늘: 정수리 가르마와 앞머리 갈래 사이 -->
+        <path class="hair-shade" d="M80 22 C76 34 74 46 72 60 C77 54 81 48 85 49 C84 38 82 30 80 22 Z" />
+        <path class="hair-shade" d="M103 53 C106 44 106 36 102 30 C108 38 113 50 116 78 C113 66 109 58 103 53 Z" />
         <!-- 머리 윤기 -->
         <path class="hair-shine" d="M58 36 Q70 27 86 28" />
         <path class="hair-shine" d="M94 30 Q101 32 106 37" />

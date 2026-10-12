@@ -25,6 +25,7 @@
   --iris-dark: #3d2466;
   --lash: #3b2430;
   --dress: #a9b8ff;
+  --dress-dark: #7f8fe0;
   --ribbon: #ff8fb8;
 }
 
@@ -122,6 +123,11 @@ body {
 .mascot .skin       { fill: var(--skin); }
 .mascot .skin-shade { fill: var(--skin-shade); }
 .mascot .dress      { fill: var(--dress); }
+.mascot .dress-shade { fill: var(--dress-dark); opacity: 0.55; }
+.mascot .fold       { fill: none; stroke: var(--dress-dark); stroke-width: 1.2; stroke-linecap: round; opacity: 0.7; }
+.mascot .face-shade { fill: var(--skin-shade); opacity: 0.7; }
+.mascot .cheek-light { fill: #ffffff; opacity: 0.5; }
+.mascot .hair-shade { fill: var(--hair-back); opacity: 0.6; }
 .mascot .collar     { fill: #ffffff; }
 .mascot .ribbon     { fill: var(--ribbon); }
 .mascot .sclera     { fill: #ffffff; }
