@@ -16,11 +16,16 @@
   --sparkle: rgba(255, 255, 255, 0.9);
   --shadow: 0 16px 40px rgba(159, 122, 234, 0.25);
 
-  --hair: #ff8fb8;
-  --skin: #ffe6d8;
-  --iris: #5b3a99;
-  --dress: #8fa8ff;
-  --ribbon: #ffd166;
+  --hair: #8a5a44;
+  --hair-back: #6e4434;
+  --hair-shine: rgba(255, 228, 210, 0.55);
+  --skin: #ffe8dc;
+  --skin-shade: #f5cdbd;
+  --iris: #7a4fbf;
+  --iris-dark: #3d2466;
+  --lash: #3b2430;
+  --dress: #a9b8ff;
+  --ribbon: #ff8fb8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -111,16 +116,37 @@ body {
   40%      { transform: translateY(-18px); }
 }
 
-.mascot .hair   { fill: var(--hair); }
-.mascot .skin   { fill: var(--skin); }
-.mascot .dress  { fill: var(--dress); }
-.mascot .collar { fill: #ffffff; }
-.mascot .ribbon { fill: var(--ribbon); }
-.mascot .iris   { fill: var(--iris); }
-.mascot .shine  { fill: #ffffff; }
-.mascot .blush  { fill: #ff9fb5; opacity: 0.6; }
-.mascot .line   { fill: none; stroke: var(--iris); stroke-width: 3; stroke-linecap: round; }
+.mascot .hair       { fill: var(--hair); }
+.mascot .hair-back  { fill: var(--hair-back); }
+.mascot .hair-shine { fill: none; stroke: var(--hair-shine); stroke-width: 2.5; stroke-linecap: round; }
+.mascot .skin       { fill: var(--skin); }
+.mascot .skin-shade { fill: var(--skin-shade); }
+.mascot .dress      { fill: var(--dress); }
+.mascot .collar     { fill: #ffffff; }
+.mascot .ribbon     { fill: var(--ribbon); }
+.mascot .sclera     { fill: #ffffff; }
+.mascot .iris       { fill: var(--iris); }
+.mascot .iris-shade { fill: var(--iris-dark); opacity: 0.55; }
+.mascot .pupil      { fill: var(--iris-dark); }
+.mascot .shine      { fill: #ffffff; }
+.mascot .blush      { fill: #ff9fb5; opacity: 0.5; }
+.mascot .brow       { fill: none; stroke: var(--hair-back); stroke-width: 1.6; stroke-linecap: round; }
+.mascot .lash       { fill: none; stroke: var(--lash); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.mascot .lash-lower { fill: none; stroke: var(--lash); stroke-width: 0.8; stroke-linecap: round; opacity: 0.5; }
+.mascot .nose       { fill: none; stroke: var(--skin-shade); stroke-width: 1.4; stroke-linecap: round; }
+.mascot .line       { fill: none; stroke: #c4566f; stroke-width: 1.8; stroke-linecap: round; }
 .mascot .mouth-happy { fill: #e2557a; }
+
+/* 가끔 눈을 깜빡인다 */
+.mascot .eyes-open {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 4.5s infinite;
+}
+@keyframes blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  97%           { transform: scaleY(0.1); }
+}
 
 .mascot .eyes-happy,
 .mascot .mouth-happy { display: none; }
