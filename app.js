@@ -312,8 +312,10 @@ async function spin() {
   render();
 
   // 처음엔 빠르게, 점점 느려지며 후보를 넘겨 보다가 당첨된 할 일에서 멈춘다
-  if (!reducedMotion && candidates.length > 1) {
+  if (!reducedMotion) {
     spinning = true;
+    // 지난번 점프 효과가 남아 있으면 흔들기를 덮어쓰므로 먼저 뗀다
+    mascot.classList.remove("jump");
     mascot.classList.add("spinning");
     let i = Math.floor(Math.random() * candidates.length);
     for (let delay = 50; delay < 280; delay *= 1.12) {
