@@ -343,6 +343,20 @@ body {
 .todo-item .due.soon    { color: var(--accent); }
 .todo-item .due.overdue { color: var(--accent-text); background: var(--danger); }
 
+.todo-item .text { cursor: text; }
+
+.todo-item .edit {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--track);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  outline: none;
+}
+
 .todo-item.done .text {
   color: var(--muted);
   text-decoration: line-through;

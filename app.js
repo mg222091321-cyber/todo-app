@@ -125,6 +125,8 @@ function render() {
       text.append(author);
     }
     text.append(todo.text);
+    text.title = "두 번 누르면 고칠 수 있어요";
+    text.addEventListener("dblclick", () => startEdit(todo, text));
 
     const due = document.createElement("span");
     if (todo.due_date) {
@@ -167,6 +169,62 @@ function render() {
   empty.hidden = todos.length > 0;
 
   updateMascot(doneCount);
+}
+
+// 할 일 글자를 입력칸으로 바꿔 고친다. Enter·포커스 이동은 저장, Esc는 취소
+function startEdit(todo, textEl) {
+  const field = document.createElement("input");
+  field.type = "text";
+  field.className = "edit";
+  field.value = todo.text;
+  field.setAttribute("aria-label", "할 일 고치기");
+  textEl.replaceWith(field);
+  field.focus();
+  field.select();
+
+  let busy = false;
+  let finished = false;
+
+  async function finish(save) {
+    if (busy || finished) return;
+    const next = field.value.trim();
+    // 비우거나 그대로면 저장할 게 없으니 원래 글자로 돌아간다
+    if (!save || !next || next === todo.text) {
+      finished = true;
+      return render();
+    }
+
+    busy = true;
+    field.disabled = true;
+    const { data, error } = await db
+      .from("todos")
+      .update({ text: next })
+      .eq("id", todo.id)
+      .select("id");
+    busy = false;
+    const failure = requireRows(data, error);
+    if (failure) {
+      field.disabled = false;
+      field.focus();
+      return showError("할 일을 고치지", failure);
+    }
+    finished = true;
+    clearError();
+    todo.text = next;
+    render();
+  }
+
+  field.addEventListener("keydown", (e) => {
+    // 한글을 조합하는 중의 Enter는 글자 확정용이라 저장하지 않는다
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      finish(true);
+    } else if (e.key === "Escape") {
+      finish(false);
+    }
+  });
+  field.addEventListener("blur", () => finish(true));
 }
 
 function updateMascot(doneCount) {
